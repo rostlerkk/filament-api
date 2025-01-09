@@ -200,7 +200,10 @@ class FilamentAPIServices
         $rules = [];
         $components = $form->getComponents();
         foreach ($components as $component) {
-            $rules[$component->getId()] = array_values($component->getValidationRules());
+            //$rules[$component->getId()] = array_values($component->getValidationRules());
+            if (method_exists($component, 'getValidationRules')) {
+                $rules[$component->getId()] = array_values($component->getValidationRules());
+            }
         }
 
         $request->validate($rules);
@@ -220,14 +223,19 @@ class FilamentAPIServices
         $rules = [];
         $components = $form->getComponents();
         foreach ($components as $component) {
-            $validation = $component->getValidationRules();
-            foreach ($validation as $key => $value){
-                if($value instanceof Unique){
-                    $validation[$key] = $value->ignore($record->id);
+            if (method_exists($component, 'getValidationRules')) {
+                $validation = $component->getValidationRules();
+
+                foreach ($validation as $key => $rule) {
+                    if ($rule instanceof Unique) {
+                        $validation[$key] = $rule->ignore($record->id);
+                    }
                 }
+
+                $rules[$component->getId()] = $validation;
             }
-            $rules[$component->getId()] = $validation;
         }
+
 
         $request->validate($rules);
 
