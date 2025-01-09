@@ -174,11 +174,14 @@ class FilamentAPIServices
             $query->orderBy($table->getDefaultSortColumn(), $table->getDefaultSortDirection());
         }
 
-        if($resource){
-            return APIResponse::success($resource::collection($query->paginate($table->getDefaultPaginationPageOption())));
+        // Zmeňte z paginate na get pre získanie všetkých záznamov bez stránkovania
+        $results = $query->get();
+
+        if ($resource) {
+            return APIResponse::success($resource::collection($results));
         }
 
-        return APIResponse::success($query->paginate($table->getDefaultPaginationPageOption()));
+        return APIResponse::success($results);
     }
 
     protected function show(int $record, Request $request,Page $page,?string $resource=null)
